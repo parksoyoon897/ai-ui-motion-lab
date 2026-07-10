@@ -1,6 +1,6 @@
 # AI UI Motion Lab
 
-AI와 UI 사이에서 빠르게 실험한 모션 프로토타입을 모아두는 작은 모션 실험실입니다. Lottie JSON과 브라우저 미리보기를 함께 정리합니다.
+AI로 제작한 모션을 모아두는 실험실입니다. Lottie JSON과 브라우저 미리보기를 함께 정리합니다.
 
 ## Motions
 
