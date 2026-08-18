@@ -239,7 +239,7 @@
           ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2); ctx.fillStyle = b.color; ctx.fill();
         }
         ctx.restore();
-        // 안쪽 그림자와 유리 림: 공의 색은 유지하면서 유리통의 경계만 분명하게 만든다.
+        // 안쪽 그림자: 공의 색은 유지하면서 유리통의 입체감만 살린다.
         ctx.save();
         ctx.beginPath(); ctx.arc(globe.x, globe.y, globe.r, 0, Math.PI * 2); ctx.clip();
         const innerShade = ctx.createRadialGradient(globe.x, globe.y - 8, globe.r * .58, globe.x, globe.y, globe.r);
@@ -248,8 +248,6 @@
         innerShade.addColorStop(1, 'rgba(125, 195, 225, .34)');
         ctx.fillStyle = innerShade; ctx.fillRect(40, 45, 182, 182);
         ctx.restore();
-        ctx.beginPath(); ctx.arc(globe.x, globe.y, globe.r - 1, 0, Math.PI * 2);
-        ctx.strokeStyle = 'rgba(129, 196, 225, .62)'; ctx.lineWidth = 2; ctx.stroke();
         // Frame 2: 원본 좌표(91,29,79,25). 유리통보다 앞에 렌더링한다.
         ctx.beginPath();
         ctx.moveTo(91, 54);
