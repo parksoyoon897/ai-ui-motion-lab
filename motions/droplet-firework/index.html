@@ -88,20 +88,91 @@
   </main>
 
   <script>
-    const animation = lottie.loadAnimation({
-      container: document.getElementById("lottie"),
-      renderer: "svg",
-      loop: true,
-      autoplay: true,
-      path: `./droplet-firework.json?v=${Date.now()}`
-    });
+    const container = document.getElementById("lottie");
+    let animation;
+    let fallbackRestart;
+
+    function renderFallback() {
+      animation = undefined;
+      container.innerHTML = `
+        <svg viewBox="0 0 320 320" role="img" aria-label="물방울형 폭죽 모션" xmlns="http://www.w3.org/2000/svg">
+          <style>
+            .drop {
+              opacity: 0;
+              transform-box: fill-box;
+              transform-origin: center;
+              animation: burst 1s cubic-bezier(.16, 1, .72, 1) infinite;
+            }
+            .drop:nth-child(3),
+            .drop:nth-child(4) { animation-delay: 67ms; }
+            .drop:nth-child(5),
+            .drop:nth-child(6) { animation-delay: 133ms; }
+            .drop:nth-child(7) { animation-delay: 200ms; }
+            @keyframes burst {
+              0% { opacity: 0; transform: translate(var(--sx), var(--sy)) rotate(var(--r0)) scale(.5); }
+              34% { opacity: 1; }
+              70% { opacity: .72; }
+              100% { opacity: 0; transform: translate(var(--tx), var(--ty)) rotate(var(--r1)) scale(1); }
+            }
+          </style>
+          <path class="drop" style="--sx:150.5px;--sy:135.5px;--tx:90.562945px;--ty:-12.849417px;--r0:-25deg;--r1:-20deg" fill="#ff7f9a" d="M9.5 -10.3069C9.5 4.5621 2.2619 24.5 0 24.5C-2.2619 24.5 -9.5 4.8993 -9.5 -10.3069C-9.5 -18.1455 -5.2467 -24.5 0 -24.5C5.2467 -24.5 9.5 -18.1455 9.5 -10.3069Z"/>
+          <path class="drop" style="--sx:154.5px;--sy:147px;--tx:16.836161px;--ty:156.626393px;--r0:-89deg;--r1:-84deg" fill="#c99cff" d="M5.5 -5.469C5.5 2.4207 1.3095 13 0 13C-1.3095 13 -5.5 2.6 -5.5 -5.469C-5.5 -9.6282 -3.0376 -13 0 -13C3.0376 -13 5.5 -9.6282 5.5 -5.469Z"/>
+          <path class="drop" style="--sx:149.5px;--sy:136.5px;--tx:286.332014px;--ty:57.5px;--r0:53deg;--r1:58deg" fill="#ff6f8f" d="M10.5 -9.8862C10.5 4.3759 2.5 23.5 0 23.5C-2.5 23.5 -10.5 4.7 -10.5 -9.8862C-10.5 -17.4049 -5.799 -23.5 0 -23.5C5.799 -23.5 10.5 -17.4049 10.5 -9.8862Z"/>
+          <path class="drop" style="--sx:151.5px;--sy:134px;--tx:218.132414px;--ty:270.616695px;--r0:156deg;--r1:161deg" fill="#ff9a76" d="M8.5 -10.9379C8.5 4.8414 2.0238 26 0 26C-2.0238 26 -8.5 5.2 -8.5 -10.9379C-8.5 -19.2565 -4.6944 -26 0 -26C4.6944 -26 8.5 -19.2565 8.5 -10.9379Z"/>
+          <path class="drop" style="--sx:155.5px;--sy:148.5px;--tx:60.478363px;--ty:215.034867px;--r0:230deg;--r1:235deg" fill="#ffc2d1" d="M4.5 -4.8379C4.5 2.1414 1.0714 11.5 0 11.5C-1.0714 11.5 -4.5 2.3 -4.5 -4.8379C-4.5 -8.5173 -2.4853 -11.5 0 -11.5C2.4853 -11.5 4.5 -8.5173 4.5 -4.8379Z"/>
+          <path class="drop" style="--sx:154px;--sy:145.5px;--tx:194.172209px;--ty:21.862653px;--r0:21deg;--r1:26deg" fill="#ffd3b8" d="M6 -6.1C6 2.7 1.4286 14.5 0 14.5C-1.4286 14.5 -6 2.9 -6 -6.1C-6 -10.7392 -3.3137 -14.5 0 -14.5C3.3137 -14.5 6 -10.7392 6 -6.1Z"/>
+          <path class="drop" style="--sx:153px;--sy:142.5px;--tx:269.549082px;--ty:204.470246px;--r0:118deg;--r1:123deg" fill="#f6a6c8" d="M7 -7.3621C7 3.2586 1.6667 17.5 0 17.5C-1.6667 17.5 -7 3.5 -7 -7.3621C-7 -12.9611 -3.866 -17.5 0 -17.5C3.866 -17.5 7 -12.9611 7 -7.3621Z"/>
+        </svg>
+      `;
+      fallbackRestart = () => {
+        const svg = container.querySelector("svg");
+        svg.style.animation = "none";
+        svg.getBoundingClientRect();
+        svg.style.animation = "";
+      };
+    }
+
+    function loadLottie() {
+      const bodymovin = window.lottie || window.bodymovin;
+      if (!bodymovin) {
+        renderFallback();
+        return;
+      }
+
+      animation = bodymovin.loadAnimation({
+        container,
+        renderer: "svg",
+        loop: true,
+        autoplay: true,
+        path: `./droplet-firework.json?v=${Date.now()}`
+      });
+
+      animation.addEventListener("data_failed", renderFallback);
+    }
+
+    loadLottie();
 
     document.querySelector(".toolbar").addEventListener("click", (event) => {
       const action = event.target.dataset.action;
-      if (action === "play") animation.play();
-      if (action === "pause") animation.pause();
+      if (!action) return;
+      if (animation) {
+        if (action === "play") animation.play();
+        if (action === "pause") animation.pause();
+        if (action === "restart") animation.goToAndPlay(0, true);
+        return;
+      }
+
+      if (action === "restart" && fallbackRestart) fallbackRestart();
+      if (action === "pause") container.querySelectorAll(".drop").forEach((drop) => {
+        drop.style.animationPlayState = "paused";
+      });
+      if (action === "play") container.querySelectorAll(".drop").forEach((drop) => {
+        drop.style.animationPlayState = "running";
+      });
       if (action === "restart") {
-        animation.goToAndPlay(0, true);
+        container.querySelectorAll(".drop").forEach((drop) => {
+          drop.style.animationPlayState = "running";
+        });
       }
     });
   </script>
