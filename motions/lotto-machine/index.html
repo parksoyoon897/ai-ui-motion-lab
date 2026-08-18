@@ -78,7 +78,7 @@
   <body>
     <main>
       <section class="stage">
-        <canvas id="machine" aria-label="바람과 중력이 적용된 로또 추첨기"></canvas>
+        <canvas id="machine" width="269" height="356" aria-label="바람과 중력이 적용된 로또 추첨기"></canvas>
       </section>
       <section class="controls" aria-label="모션 컨트롤">
         <label class="control">
@@ -106,8 +106,6 @@
     </main>
     <script>
       /* Figma Frame 1의 269 × 356 좌표계를 그대로 사용합니다. */
-      const VIEW_W = 269;
-      const VIEW_H = 356;
       const canvas = document.querySelector('#machine');
       const ctx = canvas.getContext('2d');
       const controls = {
@@ -137,17 +135,6 @@
 
       function syncValues() {
         for (const key of Object.keys(controls)) values[key].textContent = controls[key].value;
-      }
-
-      function resizeCanvas() {
-        const dpr = Math.max(1, Math.min(window.devicePixelRatio || 1, 3));
-        canvas.width = Math.round(VIEW_W * dpr);
-        canvas.height = Math.round(VIEW_H * dpr);
-        canvas.style.width = '100%';
-        canvas.style.height = '100%';
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
       }
 
       function reset() {
@@ -239,7 +226,7 @@
         ctx.closePath(); ctx.fillStyle = '#1a8b5a'; ctx.fill();
       }
       function draw(time) {
-        ctx.clearRect(0, 0, VIEW_W, VIEW_H);
+        ctx.clearRect(0, 0, 269, 356);
         // Frame 3: 흰 유리통. 중앙은 거의 흰색, 가장자리는 아주 옅은 하늘빛으로 구분한다.
         const glassBase = ctx.createRadialGradient(globe.x - 27, globe.y - 34, 9, globe.x, globe.y, globe.r);
         glassBase.addColorStop(0, '#ffffff');
@@ -278,16 +265,14 @@
         const dt = Math.min(.025, (now - last) / 1000); last = now;
         update(now, dt); draw(now); requestAnimationFrame(loop);
       }
-      resizeCanvas();
       syncValues();
       requestAnimationFrame(loop);
 
-      function pointer(e) { const r = canvas.getBoundingClientRect(); return { x: (e.clientX-r.left)*VIEW_W/r.width, y: (e.clientY-r.top)*VIEW_H/r.height }; }
+      function pointer(e) { const r = canvas.getBoundingClientRect(); return { x: (e.clientX-r.left)*269/r.width, y: (e.clientY-r.top)*356/r.height }; }
       canvas.addEventListener('pointerdown', e => { const p = pointer(e); grabbed = balls.find(b => Math.hypot(b.x-p.x, b.y-p.y) < b.r); if (grabbed) canvas.setPointerCapture(e.pointerId); });
       canvas.addEventListener('pointermove', e => { if (!grabbed) return; Object.assign(grabbed, pointer(e)); grabbed.vx = grabbed.vy = 0; collideGlobe(grabbed); });
       canvas.addEventListener('pointerup', () => { grabbed = null; });
       canvas.addEventListener('dblclick', reset);
-      window.addEventListener('resize', resizeCanvas);
       document.querySelector('#reset').addEventListener('click', reset);
       for (const input of Object.values(controls)) input.addEventListener('input', syncValues);
     </script>
