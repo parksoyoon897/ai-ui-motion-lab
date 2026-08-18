@@ -217,10 +217,6 @@
         ctx.beginPath(); ctx.roundRect(x, y, w, h, r); ctx.fillStyle = fill; ctx.fill();
       }
       function drawBase() {
-        ctx.save();
-        ctx.shadowColor = 'rgba(20, 83, 61, .16)';
-        ctx.shadowBlur = 10;
-        ctx.shadowOffsetY = 5;
         // Rectangle 1의 Figma fill geometry: x=51, y=217, width=159.5, height=93
         ctx.beginPath();
         ctx.moveTo(87.609, 217);
@@ -233,7 +229,6 @@
         ctx.lineTo(69.097,231.720);
         ctx.bezierCurveTo(71.089,223.103,78.764,217,87.609,217);
         ctx.closePath(); ctx.fillStyle = '#2fc281'; ctx.fill();
-        ctx.restore();
         // Rectangle 2: 상단만 둥글게, 하단 좌우 모서리는 0px
         ctx.beginPath();
         ctx.moveTo(106, 310);
@@ -254,12 +249,7 @@
         // 공은 Frame 3 안쪽에서만 렌더링
         ctx.save(); ctx.beginPath(); ctx.arc(globe.x, globe.y, globe.r, 0, Math.PI * 2); ctx.clip();
         for (const b of balls) {
-          const ball = ctx.createRadialGradient(b.x - 6, b.y - 7, 3, b.x, b.y, b.r);
-          ball.addColorStop(0, '#ffffff');
-          ball.addColorStop(.22, b.color);
-          ball.addColorStop(1, '#179962');
-          ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2); ctx.fillStyle = ball; ctx.fill();
-          ctx.beginPath(); ctx.arc(b.x - 5, b.y - 6, b.r * .26, 0, Math.PI * 2); ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.fill();
+          ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2); ctx.fillStyle = b.color; ctx.fill();
         }
         ctx.restore();
         // 안쪽 그림자와 유리 림: 공의 색은 유지하면서 유리통의 경계만 분명하게 만든다.
