@@ -13,23 +13,115 @@
         display: grid;
         place-items: center;
         overflow: hidden;
-        background: #000;
+        background: #fff;
+        color: #17211e;
+        font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", sans-serif;
+      }
+      main {
+        display: grid;
+        gap: 18px;
+        justify-items: center;
+        padding: 28px 18px;
+      }
+      .stage {
+        display: grid;
+        place-items: center;
+        width: min(300px, calc(100vw - 36px));
+        aspect-ratio: 269 / 356;
       }
       canvas {
         display: block;
-        width: min(78vw, 538px);
-        height: auto;
+        width: 100%;
+        height: 100%;
         aspect-ratio: 269 / 356;
         touch-action: none;
       }
+      .controls {
+        width: min(360px, calc(100vw - 36px));
+        display: grid;
+        gap: 12px;
+        padding: 14px 16px 16px;
+        border: 1px solid rgba(23, 33, 30, .1);
+        border-radius: 8px;
+        background: #fff;
+        box-shadow: 0 12px 34px rgba(18, 32, 28, .08);
+      }
+      .control {
+        display: grid;
+        grid-template-columns: 70px 1fr 38px;
+        gap: 10px;
+        align-items: center;
+        font-size: 13px;
+      }
+      .value {
+        color: #53645f;
+        font-variant-numeric: tabular-nums;
+        text-align: right;
+      }
+      input[type="range"] {
+        width: 100%;
+        accent-color: #2fc281;
+      }
+      button {
+        height: 34px;
+        justify-self: end;
+        border: 1px solid rgba(23, 33, 30, .13);
+        border-radius: 7px;
+        background: #fff;
+        color: inherit;
+        font: inherit;
+        cursor: pointer;
+      }
+      button:hover { background: #f6fbf8; }
     </style>
   </head>
   <body>
-    <canvas id="machine" width="269" height="356" aria-label="바람과 중력이 적용된 로또 추첨기"></canvas>
+    <main>
+      <section class="stage">
+        <canvas id="machine" aria-label="바람과 중력이 적용된 로또 추첨기"></canvas>
+      </section>
+      <section class="controls" aria-label="모션 컨트롤">
+        <label class="control">
+          <span>바람</span>
+          <input id="wind" type="range" min="0" max="180" value="105" />
+          <span class="value" id="windValue">105</span>
+        </label>
+        <label class="control">
+          <span>난류</span>
+          <input id="turbulence" type="range" min="40" max="220" value="150" />
+          <span class="value" id="turbulenceValue">150</span>
+        </label>
+        <label class="control">
+          <span>회전</span>
+          <input id="swirl" type="range" min="0" max="160" value="72" />
+          <span class="value" id="swirlValue">72</span>
+        </label>
+        <label class="control">
+          <span>중력</span>
+          <input id="gravity" type="range" min="0" max="60" value="22" />
+          <span class="value" id="gravityValue">22</span>
+        </label>
+        <button type="button" id="reset">초기화</button>
+      </section>
+    </main>
     <script>
       /* Figma Frame 1의 269 × 356 좌표계를 그대로 사용합니다. */
+      const VIEW_W = 269;
+      const VIEW_H = 356;
       const canvas = document.querySelector('#machine');
       const ctx = canvas.getContext('2d');
+      const controls = {
+        wind: document.querySelector('#wind'),
+        turbulence: document.querySelector('#turbulence'),
+        swirl: document.querySelector('#swirl'),
+        gravity: document.querySelector('#gravity')
+      };
+      const values = {
+        wind: document.querySelector('#windValue'),
+        turbulence: document.querySelector('#turbulenceValue'),
+        swirl: document.querySelector('#swirlValue'),
+        gravity: document.querySelector('#gravityValue')
+      };
       const globe = { x: 131, y: 136, r: 91 };
       const ballRadius = 19.5;
       const colors = ['#3bc080', '#76f6b8', '#60e7a6', '#76f6b8', '#60e7a6', '#76f6b8', '#3bc080'];
@@ -38,6 +130,25 @@
         [111.5, 174.5], [80.5, 180.5], [148.5, 168.5]
       ];
       let balls = [], grabbed = null, last = performance.now();
+
+      function tune(name) {
+        return Number(controls[name].value);
+      }
+
+      function syncValues() {
+        for (const key of Object.keys(controls)) values[key].textContent = controls[key].value;
+      }
+
+      function resizeCanvas() {
+        const dpr = Math.max(1, Math.min(window.devicePixelRatio || 1, 3));
+        canvas.width = Math.round(VIEW_W * dpr);
+        canvas.height = Math.round(VIEW_H * dpr);
+        canvas.style.width = '100%';
+        canvas.style.height = '100%';
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+      }
 
       function reset() {
         balls = figmaStart.map(([x, y], i) => ({
@@ -75,18 +186,24 @@
       }
 
       function update(time, dt) {
+        const wind = tune('wind');
+        const turbulence = tune('turbulence');
+        const swirl = tune('swirl');
+        const gravity = tune('gravity');
         for (const b of balls) {
           if (b === grabbed) continue;
           const lower = Math.max(0, (b.y - 150) / 52);
           const nozzle = Math.max(0, 1 - Math.abs(b.x - globe.x) / 76);
-          const lift = 105 * lower * nozzle; // 바닥 송풍은 보조 역할만
+          const lift = wind * lower * nozzle; // 바닥 송풍은 보조 역할만
           const rx = (b.x - globe.x) / globe.r;
           const ry = (b.y - globe.y) / globe.r;
-          b.vy += (22 - lift) * dt;
+          b.vy += (gravity - lift) * dt;
           // 벽을 타는 일정한 회전 대신, 방향이 계속 바뀌는 내부 난류장.
           // 중심 복원력을 조금 둬서 공이 벽면에 오래 머물지 않게 한다.
-          const flowX = Math.sin(time * .005 + b.y * .13) * 165 + Math.cos(time * .009 + b.x * .09) * 112;
-          const flowY = Math.cos(time * .006 + b.x * .11) * 158 + Math.sin(time * .010 + b.y * .08) * 98;
+          const spinX = -ry * swirl;
+          const spinY = rx * swirl;
+          const flowX = Math.sin(time * .005 + b.y * .13) * turbulence + Math.cos(time * .009 + b.x * .09) * turbulence * .68 + spinX;
+          const flowY = Math.cos(time * .006 + b.x * .11) * turbulence * .96 + Math.sin(time * .010 + b.y * .08) * turbulence * .6 + spinY;
           b.vx += (flowX - rx * 130) * dt;
           b.vy += (flowY - ry * 130) * dt;
           b.vx *= .999; b.vy *= .999;
@@ -100,6 +217,10 @@
         ctx.beginPath(); ctx.roundRect(x, y, w, h, r); ctx.fillStyle = fill; ctx.fill();
       }
       function drawBase() {
+        ctx.save();
+        ctx.shadowColor = 'rgba(20, 83, 61, .16)';
+        ctx.shadowBlur = 10;
+        ctx.shadowOffsetY = 5;
         // Rectangle 1의 Figma fill geometry: x=51, y=217, width=159.5, height=93
         ctx.beginPath();
         ctx.moveTo(87.609, 217);
@@ -112,6 +233,7 @@
         ctx.lineTo(69.097,231.720);
         ctx.bezierCurveTo(71.089,223.103,78.764,217,87.609,217);
         ctx.closePath(); ctx.fillStyle = '#2fc281'; ctx.fill();
+        ctx.restore();
         // Rectangle 2: 상단만 둥글게, 하단 좌우 모서리는 0px
         ctx.beginPath();
         ctx.moveTo(106, 310);
@@ -122,7 +244,7 @@
         ctx.closePath(); ctx.fillStyle = '#1a8b5a'; ctx.fill();
       }
       function draw(time) {
-        ctx.clearRect(0, 0, 269, 356);
+        ctx.clearRect(0, 0, VIEW_W, VIEW_H);
         // Frame 3: 흰 유리통. 중앙은 거의 흰색, 가장자리는 아주 옅은 하늘빛으로 구분한다.
         const glassBase = ctx.createRadialGradient(globe.x - 27, globe.y - 34, 9, globe.x, globe.y, globe.r);
         glassBase.addColorStop(0, '#ffffff');
@@ -132,7 +254,12 @@
         // 공은 Frame 3 안쪽에서만 렌더링
         ctx.save(); ctx.beginPath(); ctx.arc(globe.x, globe.y, globe.r, 0, Math.PI * 2); ctx.clip();
         for (const b of balls) {
-          ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2); ctx.fillStyle = b.color; ctx.fill();
+          const ball = ctx.createRadialGradient(b.x - 6, b.y - 7, 3, b.x, b.y, b.r);
+          ball.addColorStop(0, '#ffffff');
+          ball.addColorStop(.22, b.color);
+          ball.addColorStop(1, '#179962');
+          ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2); ctx.fillStyle = ball; ctx.fill();
+          ctx.beginPath(); ctx.arc(b.x - 5, b.y - 6, b.r * .26, 0, Math.PI * 2); ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.fill();
         }
         ctx.restore();
         // 안쪽 그림자와 유리 림: 공의 색은 유지하면서 유리통의 경계만 분명하게 만든다.
@@ -161,13 +288,18 @@
         const dt = Math.min(.025, (now - last) / 1000); last = now;
         update(now, dt); draw(now); requestAnimationFrame(loop);
       }
+      resizeCanvas();
+      syncValues();
       requestAnimationFrame(loop);
 
-      function pointer(e) { const r = canvas.getBoundingClientRect(); return { x: (e.clientX-r.left)*269/r.width, y: (e.clientY-r.top)*356/r.height }; }
+      function pointer(e) { const r = canvas.getBoundingClientRect(); return { x: (e.clientX-r.left)*VIEW_W/r.width, y: (e.clientY-r.top)*VIEW_H/r.height }; }
       canvas.addEventListener('pointerdown', e => { const p = pointer(e); grabbed = balls.find(b => Math.hypot(b.x-p.x, b.y-p.y) < b.r); if (grabbed) canvas.setPointerCapture(e.pointerId); });
       canvas.addEventListener('pointermove', e => { if (!grabbed) return; Object.assign(grabbed, pointer(e)); grabbed.vx = grabbed.vy = 0; collideGlobe(grabbed); });
       canvas.addEventListener('pointerup', () => { grabbed = null; });
       canvas.addEventListener('dblclick', reset);
+      window.addEventListener('resize', resizeCanvas);
+      document.querySelector('#reset').addEventListener('click', reset);
+      for (const input of Object.values(controls)) input.addEventListener('input', syncValues);
     </script>
   </body>
 </html>
