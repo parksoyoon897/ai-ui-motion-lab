@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>응모권 로티 장수별 미리보기</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie.min.js"></script>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f7f9;
+      --panel: #ffffff;
+      --ink: #20242c;
+      --muted: #69707d;
+      --line: #dfe3ea;
+      --accent: #e84763;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", sans-serif;
+    }
+
+    main {
+      width: min(1280px, calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 28px 0 36px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: end;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    .note {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .controls {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    button {
+      min-width: 74px;
+      height: 36px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      overflow: visible;
+    }
+
+    .card-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 44px;
+      padding: 0 12px;
+      border-bottom: 1px solid var(--line);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .card-title span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .stage {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      display: grid;
+      place-items: center;
+      overflow: visible;
+      background:
+        linear-gradient(90deg, transparent calc(50% - 0.5px), rgba(232, 71, 99, 0.24) 50%, transparent calc(50% + 0.5px)),
+        linear-gradient(180deg, #fbfcfe 0%, #eef1f5 100%);
+    }
+
+    .lottie {
+      width: 92%;
+      height: 92%;
+      overflow: visible;
+    }
+
+    .lottie svg {
+      overflow: visible;
+    }
+
+    .lottie svg * {
+      overflow: visible;
+    }
+
+    .wide {
+      grid-column: span 2;
+    }
+
+    .error {
+      padding: 18px;
+      border: 1px solid #ffc8d1;
+      border-radius: 8px;
+      background: #fff6f8;
+      color: #9b1c34;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 980px) {
+      .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 640px) {
+      main {
+        width: min(100vw - 20px, 520px);
+        padding-top: 18px;
+      }
+
+      header {
+        display: grid;
+        align-items: start;
+      }
+
+      .controls {
+        justify-content: start;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .wide {
+        grid-column: span 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>응모권 로티 1장~7장 중앙 정렬 시연</h1>
+        <p class="note">각 JSON은 필요한 장수만 보이게 하고, 묶음 중심과 그림자 타이밍을 맞춘 뒤 그림자를 10%로 옅게 조정한 버전입니다.</p>
+      </div>
+      <div class="controls" aria-label="재생 컨트롤">
+        <button type="button" id="restart">다시 재생</button>
+        <button type="button" id="pause">정지</button>
+        <button type="button" id="play">재생</button>
+      </div>
+    </header>
+
+    <div id="error" class="error" hidden>
+      로티 플레이어를 불러오지 못했습니다. 인터넷 연결이 막혀 있으면 CDN 스크립트가 로드되지 않을 수 있습니다.
+    </div>
+
+    <section class="grid" aria-label="장수별 로티 미리보기">
+      <article class="card">
+        <div class="card-title">1장 <span>lotto-1.json</span></div>
+        <div class="stage"><div class="lottie" data-count="1"></div></div>
+      </article>
+      <article class="card">
+        <div class="card-title">2장 <span>lotto-2.json</span></div>
+        <div class="stage"><div class="lottie" data-count="2"></div></div>
+      </article>
+      <article class="card">
+        <div class="card-title">3장 <span>lotto-3.json</span></div>
+        <div class="stage"><div class="lottie" data-count="3"></div></div>
+      </article>
+      <article class="card">
+        <div class="card-title">4장 <span>lotto-4.json</span></div>
+        <div class="stage"><div class="lottie" data-count="4"></div></div>
+      </article>
+      <article class="card">
+        <div class="card-title">5장 <span>lotto-5.json</span></div>
+        <div class="stage"><div class="lottie" data-count="5"></div></div>
+      </article>
+      <article class="card">
+        <div class="card-title">6장 <span>lotto-6.json</span></div>
+        <div class="stage"><div class="lottie" data-count="6"></div></div>
+      </article>
+      <article class="card wide">
+        <div class="card-title">7장 원본 기준 <span>lotto-7.json</span></div>
+        <div class="stage"><div class="lottie" data-count="7"></div></div>
+      </article>
+    </section>
+  </main>
+
+  <script>
+    const animations = [];
+
+    function showError() {
+      document.getElementById("error").hidden = false;
+    }
+
+    function expandSvgFilterBounds(container) {
+      container.querySelectorAll("filter").forEach((filter) => {
+        filter.setAttribute("filterUnits", "userSpaceOnUse");
+        filter.setAttribute("x", "-1200");
+        filter.setAttribute("y", "-1200");
+        filter.setAttribute("width", "3200");
+        filter.setAttribute("height", "3200");
+      });
+    }
+
+    async function loadAnimation(container) {
+      const count = Number(container.dataset.count);
+      const response = await fetch(`lotto-${count}.json`);
+      const animationData = await response.json();
+
+      const animation = lottie.loadAnimation({
+        container,
+        renderer: "svg",
+        loop: true,
+        autoplay: true,
+        animationData,
+        rendererSettings: {
+          preserveAspectRatio: "xMidYMid meet",
+          filterSize: {
+            width: "400%",
+            height: "400%",
+            x: "-150%",
+            y: "-150%",
+          },
+        },
+      });
+
+      animation.addEventListener("DOMLoaded", () => {
+        expandSvgFilterBounds(container);
+      });
+
+      animations.push(animation);
+    }
+
+    async function init() {
+      if (!window.lottie) {
+        showError();
+        return;
+      }
+
+      const containers = Array.from(document.querySelectorAll(".lottie"));
+      await Promise.all(containers.map(loadAnimation));
+
+      document.getElementById("restart").addEventListener("click", () => {
+        animations.forEach((animation) => {
+          animation.goToAndPlay(0, true);
+        });
+      });
+
+      document.getElementById("pause").addEventListener("click", () => {
+        animations.forEach((animation) => animation.pause());
+      });
+
+      document.getElementById("play").addEventListener("click", () => {
+        animations.forEach((animation) => animation.play());
+      });
+    }
+
+    init().catch(showError);
+  </script>
+</body>
+</html>
