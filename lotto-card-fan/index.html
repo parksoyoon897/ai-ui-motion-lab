@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>로또 카드 곡선 펼침 모션</title>
+  <title>로또 카드 수평 펼침 모션</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie.min.js"></script>
   <style>
     :root {
@@ -129,18 +129,18 @@
   <main>
     <header>
       <div>
-        <h1>로또 카드 곡선 펼침 모션</h1>
-        <p class="note">노란 로또 카드 5장이 곡선으로 펼쳐지는 Lottie 미리보기입니다.</p>
+        <h1>로또 카드 수평 펼침 모션</h1>
+        <p class="note">노란 로또 카드 5장이 수평으로 펼쳐지는 Lottie 미리보기입니다.</p>
       </div>
       <div class="controls" aria-label="재생 컨트롤">
         <button type="button" id="restart">다시 재생</button>
         <button type="button" id="pause">정지</button>
         <button type="button" id="play">재생</button>
-        <a class="button" href="arc-5.json">JSON 열기</a>
+        <a class="button" href="horizontal-5.json">JSON 열기</a>
       </div>
     </header>
 
-    <section class="stage" aria-label="곡선 5장 카드 펼침 모션">
+    <section class="stage" aria-label="수평 5장 카드 펼침 모션">
       <div id="lottie" class="lottie"></div>
     </section>
     <p id="error" class="error" hidden>로티 플레이어를 불러오지 못했습니다. 인터넷 연결이 막혀 있으면 CDN 스크립트가 로드되지 않을 수 있습니다.</p>
@@ -157,7 +157,7 @@
         return;
       }
 
-      const response = await fetch("arc-5.json");
+      const response = await fetch("horizontal-5.json");
       const animationData = await response.json();
       animation = lottie.loadAnimation({
         container,
