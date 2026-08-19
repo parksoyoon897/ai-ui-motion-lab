@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>로또 카드 곡선 펼침 모션</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie.min.js"></script>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f7f9;
+      --panel: #ffffff;
+      --ink: #20242c;
+      --muted: #69707d;
+      --line: #dfe3ea;
+      --accent: #ffb21a;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", sans-serif;
+      letter-spacing: 0;
+    }
+
+    main {
+      width: min(960px, calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 32px 0 44px;
+    }
+
+    header {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.25;
+    }
+
+    .note {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .controls {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    button,
+    a.button {
+      min-height: 36px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #fff;
+      color: var(--ink);
+      padding: 8px 12px;
+      font: inherit;
+      font-size: 14px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    button:hover,
+    a.button:hover {
+      border-color: var(--accent);
+      color: #b36b00;
+    }
+
+    .stage {
+      display: grid;
+      place-items: center;
+      min-height: min(62vw, 520px);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      overflow: hidden;
+    }
+
+    .lottie {
+      width: min(92vw, 720px);
+      height: min(58vw, 450px);
+    }
+
+    .error {
+      margin-top: 14px;
+      padding: 14px 16px;
+      border: 1px solid #ffc8d1;
+      border-radius: 8px;
+      background: #fff6f8;
+      color: #9b1c34;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 680px) {
+      main {
+        width: min(100vw - 20px, 520px);
+        padding-top: 20px;
+      }
+
+      header {
+        display: grid;
+        align-items: start;
+      }
+
+      .controls {
+        justify-content: start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>로또 카드 곡선 펼침 모션</h1>
+        <p class="note">노란 로또 카드 5장이 곡선으로 펼쳐지는 Lottie 미리보기입니다.</p>
+      </div>
+      <div class="controls" aria-label="재생 컨트롤">
+        <button type="button" id="restart">다시 재생</button>
+        <button type="button" id="pause">정지</button>
+        <button type="button" id="play">재생</button>
+        <a class="button" href="arc-5.json">JSON 열기</a>
+      </div>
+    </header>
+
+    <section class="stage" aria-label="곡선 5장 카드 펼침 모션">
+      <div id="lottie" class="lottie"></div>
+    </section>
+    <p id="error" class="error" hidden>로티 플레이어를 불러오지 못했습니다. 인터넷 연결이 막혀 있으면 CDN 스크립트가 로드되지 않을 수 있습니다.</p>
+  </main>
+
+  <script>
+    const container = document.getElementById("lottie");
+    const error = document.getElementById("error");
+    let animation;
+
+    async function init() {
+      if (!window.lottie) {
+        error.hidden = false;
+        return;
+      }
+
+      const response = await fetch("arc-5.json");
+      const animationData = await response.json();
+      animation = lottie.loadAnimation({
+        container,
+        renderer: "svg",
+        loop: true,
+        autoplay: true,
+        animationData,
+        rendererSettings: {
+          preserveAspectRatio: "xMidYMid meet"
+        }
+      });
+    }
+
+    document.getElementById("restart").addEventListener("click", () => {
+      animation?.goToAndPlay(0, true);
+    });
+    document.getElementById("pause").addEventListener("click", () => animation?.pause());
+    document.getElementById("play").addEventListener("click", () => animation?.play());
+
+    init().catch(() => {
+      error.hidden = false;
+    });
+  </script>
+</body>
+</html>
